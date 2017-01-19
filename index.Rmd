@@ -9,7 +9,8 @@ output:
     fig_width: 6
     fig_height: 4
     code_folding: hide
-    author: "jahapaula"
+
+author: "jahapaula"
 ---
 
 ***
