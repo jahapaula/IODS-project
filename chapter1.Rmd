@@ -1,4 +1,7 @@
 
-# About the project
+# About jahapaula's data science project
 
-*Write a short description about the course and add a link to your github repository here. This is an R markdown (.Rmd) file so you can use R markdown syntax. See the 'Useful links' page in the mooc area (chapter 1) for instructions.*
+Here we are at 8am on the first lecture of the data science course. For me this is an attempt to dedicate two hours per week to actually work with R and git and try to get my skills on a more stable level. So fat I've just been clicking around things and editing code made by other people without _really_ understanding what I'm doing.
+
+All the action will be taking place in my [github repository for this course](https://github.com/jahapaula/IODS-project).
+
