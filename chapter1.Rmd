@@ -1,7 +1,7 @@
 
 # About jahapaula's data science project
 
-Here we are at 8am on the first lecture of the data science course. For me this is an attempt to dedicate two hours per week to actually work with R and git and try to get my skills on a more stable level. So fat I've just been clicking around things and editing code made by other people without _really_ understanding what I'm doing.
+Here we are at 8am on the first lecture of the data science course. For me this is an attempt to dedicate two hours per week to actually work with R and git and try to get my skills on a more stable level. So far I've just been clicking around things and editing code made by other people without _really_ understanding what I'm doing.
 
 All the action will be taking place in my [github repository for this course](https://github.com/jahapaula/IODS-project).
 
