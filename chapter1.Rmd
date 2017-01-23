@@ -1,5 +1,5 @@
 
-# About jahapaula's data science project
+# Chapter 1: Welcome to jahapaula's data science project
 
 Here we are at 8am on the first lecture of the data science course. For me this is an attempt to dedicate two hours per week to actually work with R and git and try to get my skills on a more stable level. So far I've just been clicking around things and editing code made by other people without _really_ understanding what I'm doing.
 
