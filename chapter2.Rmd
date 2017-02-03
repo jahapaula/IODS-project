@@ -7,10 +7,78 @@
 - Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
 - Assume the reader has no previous knowledge of your data or the more advanced methods you are using  -->
 
-This dataset is based on a survey collected from the students of Introduction to Social Statistics course in fall 2014, and it investigates the students' pproaches to Learning (for a previuos study, see Vehkalahti 2015). The survey data includes responses from 166 participatns, who passed the course since their full exam points is over zero.
+Starting off by loading all the packages needed for this analysis
+```{r}
+library(dplyr)
+library(ggplot2)
+library(GGally)
+```
 
-For the purposes of this study different variables measuring learning attitudes were computed as combined variables reflecting deep learning, strategic learning, and surface learning (see Appendix A for the full survey questionnaire). All these variables are measured on a likert scale of 1 to 5.
+## Data
 
+This dataset is based on a survey collected from the students of Introduction to Social Statistics course in fall 2014, and it investigates the students' pproaches to Learning (for a previuos study, see [Vehkalahti 2015](http://www.slideshare.net/kimmovehkalahti/the-relationship-between-learning-approaches-and-students-achievements-in-an-introductory-statistics-course-in-finland)). The survey data includes responses from 166 participants (110 female, 56 male, mean age = 25.51), who participated the final exam and received at least one point.
 
-'''
-'''
+```{r}
+students2014 <- read.csv("data/lrn14_final.csv", row.names = 1, header=TRUE)
+str(students2014)
+dim(students2014)
+```
+
+For the purposes of this study different variables measuring learning attitudes were computed as combined variables reflecting deep learning (deep), strategic learning (stra), and surface learning (surf, see [Appendix A](http://www.helsinki.fi/~kvehkala/JYTmooc/JYTOPKYS3-meta.txt) for the full survey questionnaire). All these variables are measured on a likert scale of 1 to 5 (see Table 1).
+
+```{r}
+summary(students2014)
+# descriptive statistics would be given in a table here.
+```
+[Table 1 here]
+
+## Method
+
+The cross-correlation table drawn with ggplot shows that biggest correlation coefficients exist between variables Points and Attitude (.437) as well as a negative correlation between variables of deep and surface learning (-0.324). Some interesting differences in the distributions can be observed by gender in the variables of Attitude and surface learning. These would require further statistical examination, which is not in the scope of this paper.
+
+```{r}
+pic <- ggpairs(students2014, mapping = aes(col = gender, alpha = 0.3), lower = list(combo = wrap("facethist", bins = 20)))
+pic
+```
+
+Next, a multiple linear regression was used to investigate the relationship between learning styles and final exam points. Based on the cross-correlation table three variables were selected for the first model: attitude, strategic learning and surface learning (the last of  which was expected to have a negative effect)
+
+```{r}
+model1 <- lm(Points ~ Attitude + stra + surf, data = students2014)
+summary(model1)
+```
+
+[Table 2 here]
+
+In Model 1 it is shown that attitude positive ifluences final exam points (beta 0.22952 p<.001), but the effect size is not very big. In this model, strategic learning and surface learning proved non-significant. Explanatory power (adjusted R-squared) for this model is 0.19, which mean that the model explains 21% of the variation of the dependent variabe Points. This R-squared is very low even for social sciences. 
+
+Therefore, two other models were tested by excluding the explanatory variable surf from the model. Surf had smaller effect and a larger p value in the model, in addition to which the correlation coeffient in the ggpairs was lower compared to stra.
+
+```{r}
+model2 <- lm(Points ~ Attitude + stra, data = students2014)
+summary(model2)
+```
+
+In Model 2 the postiive effect of attitude to final exam points remains (p<.001). In this model also strategic learning styles shows a positive effect over exam success (p<0.1). However, the explanatory power of the model is still very low, adjusted R-squared 0.20.
+
+Also Model 3 with attitude and surface learning style as the independent variables was tested, but surface learning did not yield explanatory power and the R-squared was lower than for both Models 1 and 2. Hence, Model 2 was chosen as the final model, which shows that students performance in the final exam is explained by their attitude, measured as their global attitude toward statistics.
+
+Finally, three diagnostic plots were produced to explore the validity of the model: Residuals vs Fitted values, Normal QQ-plot, and Residuals vs Leverage.
+
+```{r}
+plot(model2, which = c(1, 2, 5))
+```
+
+First, regression analysis assumes that the size of errors in the model should not be dependent on the independent variables. The scatter plot of **residuals vs. fitted values** shows that the errors have a constant variance as no pattern is found in the plot.
+
+Second, the **QQ plot** implies that the errors of the model follow a linear line reasonably well, showing that the errors are normally distributed.
+
+Third, the **residuals versus leverage** show that there are no individual observations that would distort the model, as all observations are grouped close to the plot and no ouliers exist.
+
+Hence, to conclude, all assumptions required for a regression analysis to be valid are met with this dataset and Model 2.
+
+## Conclusion
+
+In the above conducted regression analysis the relationship between students' exam performance and their learning strategies, age, and general attitude towards statistics was studied using multiple linear regression. The findings indicate that the most important variable eplaining students' performance in the final exam is their attitude towards statistics. Also the adoption of startegic learning styles, such as planning one's study week, listening to guidelines, organizing one's time carefully, shows a minor effect to exam performance.
+
+A practical conclusion would be: learn to love statistics to get better grades!
