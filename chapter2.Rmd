@@ -69,7 +69,7 @@ Finally, three diagnostic plots were produced to explore the validity of the mod
 plot(model2, which = c(1, 2, 5))
 ```
 
-First, regression analysis assumes that the size of errors in the model should not be dependent on the independent variables. The scatter plot of **residuals vs. fitted values** shows that the errors have a constant variance as no pattern is found in the plot.
+First, regression analysis assumes that the size of errors in the model should not be dependent on the independent variables. The scatter plot of **residuals vs. fitted values** shows that the errors have a constant variance as no pattern is found in the plot apart from a few outliners in the middle.
 
 Second, the **QQ plot** implies that the errors of the model follow a linear line reasonably well, showing that the errors are normally distributed.
 
@@ -79,6 +79,6 @@ Hence, to conclude, all assumptions required for a regression analysis to be val
 
 ## Conclusion
 
-In the above conducted regression analysis the relationship between students' exam performance and their learning strategies, age, and general attitude towards statistics was studied using multiple linear regression. The findings indicate that the most important variable eplaining students' performance in the final exam is their attitude towards statistics. Also the adoption of startegic learning styles, such as planning one's study week, listening to guidelines, organizing one's time carefully, shows a minor effect to exam performance.
+In the above conducted regression analysis the relationship between students' exam performance and their learning strategies, age, and general attitude towards statistics was studied using multiple linear regression. The findings indicate that the most important variable eplaining students' performance in the final exam is their attitude towards statistics. Also the adoption of startegic learning styles, such as planning one's study week, listening to guidelines, organizing one's time carefully, shows a minor effect to exam performance. However, the explanatory power of the model is not very high, so it is probable that there are other factors not measured in this study that would better explain high points in the final exam.
 
-A practical conclusion would be: learn to love statistics to get better grades!
+Nevertheless, based on this investigation, a practical conclusion would be: **learn to love statistics to get better grades**!
