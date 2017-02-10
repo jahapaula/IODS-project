@@ -1,0 +1,163 @@
+# Chapter 2: Playing out with logistic regression analysis
+
+<!--  
+*Describe the work you have done this week and summarize your learning.*
+
+- Describe your work and results clearly. 
+- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
+- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  -->
+
+Again starting off by loading all the packages needed for this analysis
+```{r}
+library(dplyr)
+library(ggplot2)
+library(GGally)
+library(tidyr)
+```
+
+## Data
+
+The dataset at hand is Student Alcohol Consumption Data Set, (see [1] and [data information](https://archive.ics.uci.edu/ml/datasets/STUDENT+ALCOHOL+CONSUMPTION#)). The original survey data is collected on two different classes in two high schools. For this study the data from two different surveys were combined: from mathematics class and from portugese class. Only the students who participated the survey on both classes were included in the analysis, by joining the two datasetss using the background variables. The final dataset includes 382 respondents and 35 variables, listed below in Table 1.
+
+
+```{r}
+# Table 1
+alc <- read.csv("data/alc_final.csv", row.names = 1, header=TRUE)
+colnames(alc)
+```
+
+The purpose of this analysis is to study the predictors of high/low alcohol consumption. High alcohol comsumption is defined as taking more then 2 portions on average per week. We start the exploration with the following set of hypotheses.
+
+First, students with more absenses or more past class failures are most likely to behave badly in other ways too (REF) and hence drink more alcohol.
+
+**H1. Number of school absenses predicts high alcohol consumption.**
+**H2. Number of past class failures predicts high alcohol consumption**
+
+Second, alcohol consumption is often related to social activities (REF, REF)
+
+**H3. Higher reported value in going out with friends predicts high alcohol consumption.**
+
+Finally, based on previous national level studies (REF), male students are more likely to consume higher amounts of alcohol compared to women. Hence:
+
+**H4. Male gender predicts high alcohol consumption.**
+
+```{r}
+selected_columns <- c("sex","absences","failures","goout","high_use")
+alc_sel <- select(alc, one_of(selected_columns))
+```
+
+##Distributions
+
+First lets investigate the distributions of the variables using gather and ggplot. To be honest I'm not sure why the gather-function is needed here.
+
+```{r}
+gather(alc_sel) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar()
+
+```
+
+Next, the selected variables are compared to the variable that classifies the students who take over two doses of alcohol per week as high users of alcohol.
+
+```{r}
+fig1 <- ggplot(alc_sel, aes(x = failures, fill = high_use))
+fig1 + geom_bar() + ylab("failures") + ggtitle("Figure 1. Students' previous failures by alcohol consumption")
+```
+Figure 1 shows students' previous course failures by alcohol consumption. The distribution is heavily biased towards zero. It is difficult to make any conclusion based on the figure only. Majority of the non-failed student are not high users of alcohol, however.
+
+```{r}
+fig2 <- ggplot(alc, aes(x = high_use, y = absences))
+fig2 + geom_boxplot() + ylab("absences") + ggtitle("Figure 2. Student absences by alcohol consumption")
+```
+
+Figure 2 shows student absences by alcohol consumption. We can observe that high users of alcohol have larger numbers of absences.
+
+```{r}
+fig3 <- ggplot(alc_sel, aes(x = goout, fill = high_use))
+fig3 + geom_bar() + ylab("going out") + ggtitle("Figure 3. Students reported going our with friend by alcohol consumption")
+```
+
+Figure 3 shows students' reported going our with friend by alcohol consumption. It looks like students who are high-users of alcohol are also going out more with their friends. The majority of respondents report going moderately out.
+
+```{r}
+fig4 <- ggplot(data = alc, aes(x = high_use))
+fig4 + geom_bar() + facet_wrap("sex") + ggtitle("Figure 4. Students alcohol consumption by sex")
+```
+Figure 4 shows the distributions or high and low alcohol users by gender. We can observe that in males there are more high users in numbers and also proportionally.
+
+Based on these graps it is reasonable to proceed with these variables. The only exception is previous failures, which is difficult to interpret from the plot.
+
+
+## Method
+
+In order to test the hypotheses logistic regression was used.
+
+```{r}
+# fit the model
+m1 <- glm(high_use ~ goout + failures + absences + sex, data = alc, family = "binomial")
+summary(m1)
+
+# compute odds ratios confidence intervals
+oddra <- coef(m1) %>% exp
+coin <- confint(m1) %>% exp
+cbind(oddra, coin)
+```
+
+The regression model confirms that three of the four variables are significant in predicting high alcohol use: absences, going out with friends, and male sex. Hence, hypotheses H1, H3 and H4 can be accepted. H2, however, suggested that previous course failures would predict high alcohol use. H2 must be rejected.
+
+Odd rations for all explanatory variables are positive. Students who go out with friends are two times more likely to drink high dosages of alcohol, and male student 2,5 times more likely to drink high dosages. The effect of absences is only slightly above one at 1,09, but the confidence intervals nevertheless remain above one. Hence the positive effect is small but it exists.
+
+For the final model the non-significant predictor of failures is removed.
+
+```{r}
+# fit the new model
+m2 <- glm(high_use ~ goout + absences + sex, data = alc, family = "binomial")
+summary(m2)
+
+# compute odds ratios confidence intervals
+oddra <- coef(m2) %>% exp
+coin <- confint(m2) %>% exp
+cbind(oddra, coin)
+```
+
+Next let's use the model to predict future values. 
+
+```{r}
+# predict() the probability of high_use
+probabilities <- predict(m2, type = "response")
+alc_sel <- mutate(alc_sel, probability = probabilities)
+alc_sel <- mutate(alc_sel, prediction = probability > 0.5)
+table(high_use = alc_sel$high_use, prediction = alc_sel$prediction)
+```
+
+bla blaa blaa
+
+
+```{r}
+# a plot of high_use versus probability, prediction as colors
+g <- ggplot(alc_sel, aes(x = probability, y = high_use, col = prediction))
+g + geom_point()
+
+# tabulate the target variable versus the predictions
+table(high_use = alc_sel$high_use, prediction = alc_sel$prediction) %>% prop.table() %>% addmargins()
+```
+
+First, regression analysis assumes that the size of errors in the model should not be dependent on the independent variables. The scatter plot of **residuals vs. fitted values** shows that the errors have a constant variance as no pattern is found in the plot apart from a few outliners in the middle.
+
+Second, the **QQ plot** implies that the errors of the model follow a linear line reasonably well, showing that the errors are normally distributed.
+
+Third, the **residuals versus leverage** show that there are no individual observations that would distort the model, as all observations are grouped close to the plot and no ouliers exist.
+
+Hence, to conclude, all assumptions required for a regression analysis to be valid are met with this dataset and Model 2.
+
+## Conclusion
+
+In the above conducted regression analysis the relationship between students' exam performance and their learning strategies, age, and general attitude towards statistics was studied using multiple linear regression. The findings indicate that the most important variable eplaining students' performance in the final exam is their attitude towards statistics. Also the adoption of startegic learning styles, such as planning one's study week, listening to guidelines, organizing one's time carefully, shows a minor effect to exam performance. However, the explanatory power of the model is not very high, so it is probable that there are other factors not measured in this study that would better explain high points in the final exam.
+
+Nevertheless, based on this investigation, a practical conclusion would be: **learn to love statistics to get better grades**!
+
+References:
+
+[1]. P. Cortez and A. Silva. Using Data Mining to Predict Secondary School Student Performance. In A. Brito and J. Teixeira Eds., Proceedings of 5th FUture BUsiness TEChnology Conference (FUBUTEC 2008) pp. 5-12, Porto, Portugal, April, 2008, EUROSIS, ISBN 978-9077381-39-7.
+
+```{r}
+
+```

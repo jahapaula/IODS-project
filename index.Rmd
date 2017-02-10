@@ -24,3 +24,8 @@ author: "jahapaula"
 ```
 
 ***
+
+```{r child = "chapter3.Rmd"}
+```
+
+***
