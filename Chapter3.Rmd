@@ -154,6 +154,16 @@ loss_func(class = alc_sel$high_use, prob = alc_sel$probability)
 ```
 This computed average proportion of incorrect predictions means that approximately 20 % of the predictions were incorrect following model m2. This training error is lower than the error achieved e.g. by guessing all students to be low-use alcohol consumers (29%). Hence the performance of the model is not perfect but better than a random guess. More variable testing would be needed to make the model more accurate.
 
+```{r}
+# K-fold cross-validation
+library(boot)
+cv <- cv.glm(data = alc_sel, cost = loss_func, glmfit = m2, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]
+```
+Performing a 10-fold cross validation for the model shows that the mean prediction error also for testing data is pretty close to the original training error.
+
 ## Conclusion
 
 In the above conducted logistic regression analysis the aim was to study the predictors of high alcohol consumption. Four hypotheses were formulated based on previous research (REF REF). The results show that high number of school absenses, higher reported value in going out with friends, and male sex predict high alcohol consumption.

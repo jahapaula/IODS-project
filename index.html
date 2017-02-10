@@ -469,6 +469,14 @@ loss_func &lt;- function(class, prob) {
 loss_func(class = alc_sel$high_use, prob = alc_sel$probability)</code></pre>
 <pre><code>## [1] 0.2094241</code></pre>
 <p>This computed average proportion of incorrect predictions means that approximately 20 % of the predictions were incorrect following model m2. This training error is lower than the error achieved e.g. by guessing all students to be low-use alcohol consumers (29%). Hence the performance of the model is not perfect but better than a random guess. More variable testing would be needed to make the model more accurate.</p>
+<pre class="r"><code># K-fold cross-validation
+library(boot)
+cv &lt;- cv.glm(data = alc_sel, cost = loss_func, glmfit = m2, K = 10)
+
+# average number of wrong predictions in the cross validation
+cv$delta[1]</code></pre>
+<pre><code>## [1] 0.2198953</code></pre>
+<p>Performing a 10-fold cross validation for the model shows that the mean prediction error also for testing data is pretty close to the original training error.</p>
 </div>
 <div id="conclusion-1" class="section level2">
 <h2>Conclusion</h2>
