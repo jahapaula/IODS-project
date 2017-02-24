@@ -97,12 +97,12 @@ We notice that there is one integer variable in the data (age). Since we will so
 
 ```{r}
 tea$age2 <- cut(tea$age, breaks = c(15, 25, 35, 45, 55, 65, 75, 85))
-tea_ <- select(tea, -age)
+tea_ <- dplyr::select(tea, -age)
 ```
 After this the royal we here notices that there already exists a factorized variable age_Q in the data. Oh well.
 
 ```{r}
-tea_ <- select(tea_, -age2) #overlyhonestmethods
+tea_ <- dplyr::select(tea_, -age2) #overlyhonestmethods
 ```
 
 In any case, the full data set is rather large for visualization, so let's pick a few interesting varibales to investigate. 
@@ -112,7 +112,7 @@ In any case, the full data set is rather large for visualization, so let's pick 
 keep_columns <- c("Tea", "How", "age_Q", "where", "friends", "sugar", "price", "tea.time", "sex")
 
 # select the 'keep_columns' to create a new dataset tea_time
-tea_time <- select(tea_, one_of(keep_columns))
+tea_time <- dplyr::select(tea_, one_of(keep_columns))
 
 gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
 ``` 
@@ -133,8 +133,8 @@ plot(mca, invisible=c("ind"), habillage = "quali")
 The plot for the full dataset is rather difficult to interpret since all variables are gathered near the center of the plot. Let's move on by using just the selected variables and try to investigate hos differently aged individuals use tea.
 
 ```{r}
-
-tea_time2 <- select(tea_time, -price, -How)
+# removing some un-interesting variables
+tea_time2 <- dplyr::select(tea_time, -price, -How)
 
 # multiple correspondence analysis
 mca_sub <- MCA(tea_time2, graph = FALSE)
