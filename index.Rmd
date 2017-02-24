@@ -34,3 +34,8 @@ author: "jahapaula"
 ```
 
 ***
+
+```{r child = "chapter5.Rmd"}
+```
+
+***

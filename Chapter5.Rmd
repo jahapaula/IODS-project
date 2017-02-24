@@ -1,0 +1,158 @@
+# Chapter 5: Dimensionality reduction
+
+<!--  
+*Describe the work you have done this week and summarize your learning.*
+
+- Describe your work and results clearly. 
+- Assume the reader has an introductory course level understanding of writing and reading R code as well as statistical methods
+- Assume the reader has no previous knowledge of your data or the more advanced methods you are using  -->
+
+Again starting off by loading all the packages needed for this analysis:
+```{r}
+library(dplyr)
+library(ggplot2)
+library(GGally)
+library(stringr)
+library(tidyr)
+human <- read.csv("data/human.csv", row.names = 1, header=TRUE)
+```
+
+## Data
+
+The dataset used in these analysis is a dataset that lists all countries of the world, their Human Development Index (HDI), as well as other related statistical indicators. As UNDP states, teh "The Human Development Index (HDI) is a summary measure of average achievement in key dimensions of human development: a long and healthy life, being knowledgeable and have a decent standard of living. The HDI is the geometric mean of normalized indices for each of the three dimensions." 
+
+For the purposes of this analysis the data has been combined with information about Gender Inequality Index (GII). From the GII two ratios were calculated and stored as variables: the ratio of Female and Male populations with secondary education, and the ratio of labour force participation of females and males in each country. Finally, continent and world level summary datapoints were removed, as well as all observations with missing values (this is a prerequisite of the following analysis method).
+
+All the original data is collected by the United Nations Development Programme ([more information here](http://hdr.undp.org/en/content/human-development-index-hdi)). 
+
+The modified dataset has 155 observations and 8 variables. See descriptions of variables in [table1] below. 
+
+| Variable   | Description                                            |
+|-----------|---------------------------------------------------------|
+| GNI       | Gross National Income per capita                        |
+| Life_Exp  | Life expectancy at birth                                |
+| Edu_Exp   | Expected years of education                             |
+| MatMor    | Maternal mortality ratio                                |
+| Ado.Birth | Adolescent birth rate                                   |
+| Parlament_rep_F   | Percetange of female representatives in parliament      |
+| FM_Ratio_Edu   | Ratio of the proportion of females with at least secondary education |
+| FM_Ratio_Lab   | Ratio of the proportion of females in the labour force    |
+[Table 1. Variables of the data][table1]
+
+```{r}
+# explore data dimension and structures
+dim(human)
+str(human)
+```
+
+Next, let's use pairs to get a graphical overview of the data. Life expectancy and expected years of education are positively correlated. Maternal mortality rates and adolescent birth rate are are heavily correlated, as well as maternal mortality and life expectancy, which together indicate that giving more labours is a risk to the morther's health. Similarly both life expectancy and expected years of education are negatively correlated with adolescent mortality and maternal mortality rates. Fnally, GNI seems to correlate positively with larger life expectancy and with expected years of education.
+
+```{r}
+ggpairs(human)
+summary(human)
+#library(corrplot)
+#corrplot(human)
+```
+
+
+Next, let's run Principal Component Analysis without scaling the data.
+
+```{r, fig1, fig.cap="Figure 1. A PCA biplot showing world countries on a two dimensional scale. Unscaled data, which makes the plot heavily distorted by the GNI variance."}
+# perform principal component analysis (with the SVD method)
+pca_human1 <- prcomp(human)
+
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human1, choices = 1:2, cex = c(0.7, 1), col = c("grey40", "deeppink2"))
+```
+As the plot implies, the PCA doesn't exactly work with unscaled data as it is heavily distorted by the GNI variable. PCA assumes variables with larger variance are ore important than variables with saller variance (Nieminen & Kämäräinen, 2017). Hence, let's make a better analysis by scaling all the variables. 
+
+```{r fig2,fig.cap = "Figure 2. A PCA biplot showing world countries on a two dimensional scale. PC1 = Standard of living (negative), PC2 = Gender equality in politics and work. "}
+# standardize the variables
+human_std <- scale(human)
+
+# perform principal component analysis (with the SVD method)
+pca_human2 <- prcomp(human_std)
+
+# draw a biplot of the principal component representation and the original variables
+biplot(pca_human2, choices = 1:2, cex = c(0.7, 1), col = c("grey40", "deeppink2"), main = " ", sub = "Figure 2.")
+#fig.cap = "caption"
+```
+
+The plot indicates that the two main component dimensions are organized in relation to the original variables on two axis: vertical principal component dimension ranging from high-education high-life-expectancy and economic wellfare countries to countries characterized by high adolescent birth rate and hight maternal mortality rate; and the vertical dimension by the ratio of females in labour force and in the parliament - two variables that had a small correlation.
+
+PC1 here could be indicated to negatively represent general standard of living measured by mortality/health rates and national income, randing from developed countries on the left side of the plot to developing countries on the ride side. PC2, which is situated orthogonally to PC1, indicates the status of women in the society measured by the ratio of women in the parliament and in the working life.
+
+## Let's have some tea next!
+
+Then to something completely different. We will next explore the tea-drinking habits of people using a tea datase from factominer. Let's first explore the data a bit. It has 300 observations and 36 different variables.
+
+```{r}
+library(FactoMineR)
+data("tea")
+str(tea)
+dim(tea)
+#summary(tea)
+```
+We notice that there is one integer variable in the data (age). Since we will soon use Correspondence Analysis, which accepts only category variables, we will transform the integer varibale age to a factor variable with 10-year levels.
+
+```{r}
+tea$age2 <- cut(tea$age, breaks = c(15, 25, 35, 45, 55, 65, 75, 85))
+tea_ <- select(tea, -age)
+```
+After this the royal we here notices that there already exists a factorized variable age_Q in the data. Oh well.
+
+```{r}
+tea_ <- select(tea_, -age2) #overlyhonestmethods
+```
+
+In any case, the full data set is rather large for visualization, so let's pick a few interesting varibales to investigate. 
+
+```{r}
+# column names to keep in the dataset
+keep_columns <- c("Tea", "How", "age_Q", "where", "friends", "sugar", "price", "tea.time", "sex")
+
+# select the 'keep_columns' to create a new dataset tea_time
+tea_time <- select(tea_, one_of(keep_columns))
+
+gather(tea_time) %>% ggplot(aes(value)) + facet_wrap("key", scales = "free") + geom_bar() + theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 8))
+``` 
+
+Next we will run a Multiple Correspondence Analysis on the tea data, first with the the full dataset and then with some selected columns.
+
+```{r}
+# multiple correspondence analysis
+mca <- MCA(tea_, graph = FALSE)
+
+# summary of the model
+summary(mca)
+
+# visualize MCA
+plot(mca, invisible=c("ind"), habillage = "quali")
+# plot(mca, invisible=c("ind","var"))
+```
+The plot for the full dataset is rather difficult to interpret since all variables are gathered near the center of the plot. Let's move on by using just the selected variables and try to investigate hos differently aged individuals use tea.
+
+```{r}
+
+tea_time2 <- select(tea_time, -price, -How)
+
+# multiple correspondence analysis
+mca_sub <- MCA(tea_time2, graph = FALSE)
+
+# summary of the model
+summary(mca_sub)
+
+# visualize MCA
+plot(mca_sub, invisible=c("ind"), habillage = "quali")
+# plot(mca, invisible=c("ind","var"))
+```
+
+After several rounds of testing different variables no heureka findings emerged, but the final pot above indicates some patterns: respondents drink green tea alone and Earl Grey ith friends. Sugar and Earl Grey tend to go together. Green tea is bought from a tea shop.
+
+Regarding the demographic variables it seems that yonger respondents don't care about any particular tea time, whereas older generations do. Teenagers like Earl Grey with sugar; middle aged and older drink black tea without sugar. Males tend to drink tea alone, women with friends.
+
+Over and out!
+
+```{r}
+
+```
