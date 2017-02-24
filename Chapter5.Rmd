@@ -17,7 +17,7 @@ library(tidyr)
 human <- read.csv("data/human.csv", row.names = 1, header=TRUE)
 ```
 
-## Data
+## Investigating the HDI with GII
 
 The dataset used in these analysis is a dataset that lists all countries of the world, their Human Development Index (HDI), as well as other related statistical indicators. As UNDP states, teh "The Human Development Index (HDI) is a summary measure of average achievement in key dimensions of human development: a long and healthy life, being knowledgeable and have a decent standard of living. The HDI is the geometric mean of normalized indices for each of the three dimensions." 
 
@@ -141,6 +141,7 @@ mca_sub <- MCA(tea_time2, graph = FALSE)
 
 # summary of the model
 summary(mca_sub)
+dimdesc(mca_sub)
 
 # visualize MCA
 plot(mca_sub, invisible=c("ind"), habillage = "quali")
@@ -150,6 +151,8 @@ plot(mca_sub, invisible=c("ind"), habillage = "quali")
 After several rounds of testing different variables no heureka findings emerged, but the final pot above indicates some patterns: respondents drink green tea alone and Earl Grey ith friends. Sugar and Earl Grey tend to go together. Green tea is bought from a tea shop.
 
 Regarding the demographic variables it seems that yonger respondents don't care about any particular tea time, whereas older generations do. Teenagers like Earl Grey with sugar; middle aged and older drink black tea without sugar. Males tend to drink tea alone, women with friends.
+
+However in this model Dimension 1 explains 14,7% of the variance and Dimension 2 13,8%, which do not seem to be that high.
 
 Over and out!
 
